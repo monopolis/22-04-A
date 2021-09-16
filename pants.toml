@@ -1,0 +1,64 @@
+[GLOBAL]
+pants_version = '2.9.0.dev3'
+
+
+backend_packages = [
+	'pants.backend.experimental.python',
+	'pants.backend.python',
+  	'pants.backend.python.lint.black',
+  	'pants.backend.python.lint.isort',
+	'pants.backend.python.lint.pylint',
+	'pants.backend.python.typecheck.mypy',
+	"pants.backend.shell",
+	"pants.backend.shell.lint.shfmt",
+	"pants.backend.shell.lint.shellcheck",
+]
+
+[anonymous-telemetry]
+enabled = false
+
+[mypy]
+lockfile = "build-support/mypy-lock.txt"
+version = "mypy==0.910"
+
+[pylint]
+args=["--disable=W0511"]
+lockfile = "build-support/pylint-lock.txt"
+config = "pylint.ini"
+version = "pylint>=2.7,<2.8"
+extra_requirements.add = [
+	"pytest",
+]
+
+[pytest]
+args=["-v"]
+lockfile = "build-support/pytest-lock.txt"
+extra_requirements.add = [
+	"pytest-asyncio",
+	"pytest-docker",
+]
+
+[setuptools]
+lockfile = "build-support/setuptools-lock.txt"
+
+[black]
+lockfile = "build-support/black-lock.txt"
+version = "black==21.11b1"
+
+[isort]
+lockfile = "build-support/isort-lock.txt"
+
+[python]
+interpreter_constraints = ["CPython>=3.8,<4"]
+experimental_lockfile = "constraints.txt"
+
+[coverage-py]
+report = ["html", "console"]
+
+[test]
+output = "failed"
+
+[source]
+root_patterns = [
+	'packages/*',
+]

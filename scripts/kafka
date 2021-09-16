@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+function croak() {
+	echo "$1"
+	exit 1
+}
+
+function service_status() {
+	local name=$1
+	confluent local services "${name}" status 2>/dev/null | grep -i "${name}"
+}
+
+function service_stop() {
+	local name=$1
+
+	if confluent local services "${name}" status 2>/dev/null | grep -q UP; then
+		printf "Stopping service %s...\n" "${name}"
+		confluent local services "${name}" stop 2>/dev/null >/dev/null || croak "Could not start ${name}"
+	fi
+	service_status "${name}"
+}
+
+function service_start() {
+	local name=$1
+
+	if confluent local services "${name}" status 2>/dev/null | grep -q DOWN >/dev/null; then
+		printf "Starting service %s...\n" "${name}"
+		confluent local services "${name}" start 2>/dev/null >/dev/null || croak "Could not start ${name}"
+	fi
+	service_status "${name}"
+}
+
+function consume() {
+	confluent local services kafka consume "$@" 2>/dev/null
+}
+
+function produce() {
+	confluent local services kafka produce "$@" 2>/dev/null
+}
+
+function log() {
+	confluent local services kafka log "$@" 2>/dev/null
+}
+
+function usage() {
+	echo "Convenience wrapper around Confluent CLI"
+	echo
+	echo "Usage: ${script_name} up|down|status|consume <topic>|produce <topic>|log"
+}
+
+function main() {
+
+	script_name=${0##*/}
+	test ! -z "${CONFLUENT_HOME}" || croak "You need to source init_env.sh before using this script..."
+
+	if [[ "$#" -lt 1 ]]; then
+		croak "Missing required argument, see -h|--help for usage"
+	fi
+
+	case "$1" in
+	up)
+		service_start zookeeper
+		service_start kafka
+		;;
+
+	down)
+		service_stop kafka
+		service_stop zookeeper
+		;;
+	status)
+		service_status zookeeper
+		service_status kafka
+		;;
+	consume)
+		shift
+		consume "$@"
+		;;
+	produce)
+		shift
+		produce "$@"
+		;;
+	log)
+		shift
+		log "$@"
+		;;
+	-h | --help)
+		usage
+		;;
+	*)
+		croak "Invalid argument: $1, see -h|--help for usage"
+		;;
+	esac
+}
+
+main "$@"

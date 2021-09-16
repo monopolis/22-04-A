@@ -1,0 +1,26 @@
+# Pants workspace files
+/.pants.d/
+/dist/
+/.pids/
+/.pants.workdir.file_lock*
+/.pytest_cache
+
+# VSCode configuration
+.vscode/
+
+# Virtual environments
+venv/
+.venv/
+
+# Constraints generation
+requirements.in.tmp
+
+# Python files
+**/__pycache__/
+
+# Kafka etc.
+.confluent/
+confluent-*.tar.gz
+
+# Related to creating aiven resources
+certs/

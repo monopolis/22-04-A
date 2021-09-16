@@ -1,0 +1,44 @@
+name: Github Actions CI
+on:
+  push:
+    branches:
+      - wip
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  continuous_integration:
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Check out repository code"
+      uses: actions/checkout@v2
+
+    - name: "Configure cache"
+      uses: actions/cache@v2
+      id: cache
+      with:
+          path: |
+            ~/.cache/pants/setup
+            ~/.cache/pants/lmdb_store
+            ~/.cache/pants/named_caches
+          key: $${{ runner.os }}
+
+    - name: "Set up python 3.8"
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: "Lint"
+      run: ./pants lint "::"
+
+    - name: "Typecheck"
+      run: ./pants check "::"
+
+    - name: "Tests"
+      run: ./pants test "::"
+
+    - name: "Constraints up-to-date"
+      run: make check_generated_files
+

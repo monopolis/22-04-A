@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+function croak() {
+	echo "$1"
+	exit 1
+}
+
+ROOT="$(git rev-parse --show-toplevel)"
+COMPOSE_FILE="${ROOT}/integration/postgresql/docker-compose.yml"
+
+function usage() {
+	script_name=${0##*/}
+	echo "Convenience wrapper around docker-compose"
+	echo
+	echo "Usage: ${script_name} up|down"
+}
+
+function main() {
+
+	if [[ "$#" -lt 1 ]]; then
+		croak "missing required argument, see -h|--help for usage"
+	fi
+
+	case "$1" in
+	up)
+		docker-compose -f "${COMPOSE_FILE}" up -d --force-recreate
+		;;
+
+	down)
+		docker-compose -f "${COMPOSE_FILE}" down
+		;;
+	-h | --help)
+		usage
+		;;
+	*)
+		croak "invalid argument: $1, see -h|--help for usage"
+		;;
+	esac
+}
+
+main "$@"

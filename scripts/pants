@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+function croak() {
+	echo "$1"
+	exit 1
+}
+
+export PANTS_BIN_NAME="pants"
+cd "$(git rev-parse --show-toplevel)" || croak "Could not find git repostitory"
+exec ./pants "$@"
